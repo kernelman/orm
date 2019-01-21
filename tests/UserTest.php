@@ -28,8 +28,8 @@ class UserTest extends TestCase {
                     $this->assertEquals('30', (int)$result->results[0]['id']);
                     exit($result->errorCode);
                 });
-
             }
+
             if ($result->errorCode == 110) {
                 $this->assertEquals(110, $result->errorCode);
                 echo 'Connection timed: Please check host setting';
@@ -40,6 +40,32 @@ class UserTest extends TestCase {
                 $this->assertEquals(111, $result->errorCode);
                 echo 'Connection timed: Please check port setting';
                 exit($result->errorCode);
+            }
+        });
+        $orm->disconnect();
+
+        $id = 1;
+        $orm->connect((array)$conf, function ($result) use($orm, $id) {
+
+            if ($result->status) {
+                // Use string to where test
+                $orm->table('admins')->select('id, username')->where("id = $id")->fetch(function ($result) {
+                    $this->assertEquals('1', (int)$result->results[0]['id']);
+                    exit($result->errorCode);
+                });
+            }
+        });
+        $orm->disconnect();
+
+        $id = 1;
+        $orm->connect((array)$conf, function ($result) use($orm, $id) {
+
+            if ($result->status) {
+                // Use array to where
+                $orm->table('admins')->select('id, username')->where([ 'id' => $id ])->fetch(function ($result) {
+                    $this->assertEquals('1', (int)$result->results[0]['id']);
+                    exit($result->errorCode);
+                });
             }
         });
     }

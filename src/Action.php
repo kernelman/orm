@@ -58,12 +58,14 @@ class Action extends OrmAbs
     }
 
     private function wherePush($where, $clause, $side, $type) {
-        return array_push($where, [
+        array_push($where, [
                 self::TYPE      => $type,
                 self::CLAUSE    => $clause,
                 self::SIDE      => $side
             ]
         );
+
+        return $where;
     }
 
     /**
@@ -81,21 +83,12 @@ class Action extends OrmAbs
             $keys = array_keys($clause);
 
             foreach ($keys as $key){
-                array_push($wheres->where, [
-                        self::TYPE      => self::AND,
-                        self::CLAUSE    => $key,
-                        self::SIDE      => $clause[$key]
-                    ]
-                );
+                $wheres->where = $this->wherePush($wheres->where, $key, $clause[$key], self::AND);
             }
         }
 
         if(is_string($clause)) {
-            array_push($wheres->where, [
-                self::TYPE      => self::AND,
-                self::CLAUSE    => $clause,
-                self::SIDE      => $side
-            ]);
+            $wheres->where = $this->wherePush($wheres->where, $clause, $side, self::AND);
         }
 
         return $wheres;
@@ -114,21 +107,12 @@ class Action extends OrmAbs
             $keys = array_keys($clause);
 
             foreach ($keys as $key) {
-                array_push($wheres->where, [
-                        self::TYPE      => self::OR,
-                        self::CLAUSE    => $key,
-                        self::SIDE      => $clause[$key]
-                    ]
-                );
+                $wheres->where = $this->wherePush($wheres->where, $key, $clause[$key], self::OR);
             }
         }
 
         if(is_string($clause)) {
-            array_push($wheres->where, [
-                self::TYPE      => self::OR,
-                self::CLAUSE    => $clause,
-                self::SIDE      => $side
-            ]);
+            $wheres->where = $this->wherePush($wheres->where, $clause, $side, self::OR);
         }
 
         return $wheres;
