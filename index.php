@@ -12,3 +12,5 @@ date_default_timezone_set('Asia/Shanghai');
 
 define('BASE_PATH', __DIR__);
 define('CONFIG_PATH', BASE_PATH . '/config/');
+
+include_once BASE_PATH . '/vendor/autoload.php';
