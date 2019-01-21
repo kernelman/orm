@@ -15,10 +15,10 @@ use Common\Property;
 
 class Result extends OrmAbs
 {
+    public $orm;
+    public $links;
+    public $connect;
     public $results;
-    private $orm;
-    private $links;
-    private $connect;
 
     /**
      * Result constructor.

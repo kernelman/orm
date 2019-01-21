@@ -23,7 +23,7 @@ class Orm extends OrmAbs
      * @param array $server
      * @param callable $callback callback function
      */
-    public function connect($server, $callback){
+    public function connect($server, $callback) {
         $this->options = $server;
         $this->connect->connect($server, function(\swoole_mysql $db, $result) use ($callback) {
             $callback(new Result($this, $db, $result, true));

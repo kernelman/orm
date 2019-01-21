@@ -17,7 +17,7 @@ trait Combined
     /**
      * @return string
      */
-    private function genSelect() {
+    private function setSelect() {
         if(sizeof($this->select) == 0){
             return self::SELECT;
         }
@@ -34,15 +34,15 @@ trait Combined
     /**
      * @return string
      */
-    private function genTable() {
+    private function setTable() {
 
-        return "FROM ".$this->getTable() . " ";
+        return "FROM ". $this->getTable() . " ";
     }
 
     /**
      * @return string
      */
-    private function genWhere(){
+    private function setWhere(){
         if(sizeof($this->where) == 0) {
             return "";
         }
@@ -78,7 +78,7 @@ trait Combined
     /**
      * @return string
      */
-    private function genGroup() {
+    private function setGroup() {
         if(sizeof($this->group) == 0) {
             return "";
         }
@@ -94,7 +94,7 @@ trait Combined
     /**
      * @return string
      */
-    private function genOrder() {
+    private function setOrder() {
         if(sizeof($this->order) == 0){
             return "";
         }
@@ -111,15 +111,15 @@ trait Combined
     /**
      * @return string
      */
-    private function genLimit() {
+    private function setLimit() {
         if(sizeof($this->limit) == 0){
             return '';
         }
 
         if($this->limit[self::OFFSET] == 0) {
-            return "LIMIT ".$this->limit[self::NUM]." ";
+            return "LIMIT ". $this->limit[self::NUM] . " ";
         }
 
-        return "LIMIT ".$this->limit[self::OFFSET].",".$this->limit[self::NUM]." ";
+        return "LIMIT ". $this->limit[self::OFFSET] . "," . $this->limit[self::NUM] . " ";
     }
 }

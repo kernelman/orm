@@ -81,12 +81,21 @@ class Action extends OrmAbs
             $keys = array_keys($clause);
 
             foreach ($keys as $key){
-                $wheres->where = $this->wherePush($wheres->where, $key, $clause[$key], self::AND);
+                array_push($wheres->where, [
+                        self::TYPE      => self::AND,
+                        self::CLAUSE    => $key,
+                        self::SIDE      => $clause[$key]
+                    ]
+                );
             }
         }
 
         if(is_string($clause)) {
-            $wheres->where = $this->wherePush($wheres->where, $clause, $side, self::AND);
+            array_push($wheres->where, [
+                self::TYPE      => self::AND,
+                self::CLAUSE    => $clause,
+                self::SIDE      => $side
+            ]);
         }
 
         return $wheres;
@@ -104,13 +113,22 @@ class Action extends OrmAbs
         if(is_array($clause)){
             $keys = array_keys($clause);
 
-            foreach ($keys as $key){
-                $wheres->where = $this->wherePush($wheres->where, $key, $clause[$key], self::OR);
+            foreach ($keys as $key) {
+                array_push($wheres->where, [
+                        self::TYPE      => self::OR,
+                        self::CLAUSE    => $key,
+                        self::SIDE      => $clause[$key]
+                    ]
+                );
             }
         }
 
         if(is_string($clause)) {
-            $wheres->where = $this->wherePush($wheres->where, $clause, $side, self::OR);
+            array_push($wheres->where, [
+                self::TYPE      => self::OR,
+                self::CLAUSE    => $clause,
+                self::SIDE      => $side
+            ]);
         }
 
         return $wheres;
@@ -200,7 +218,7 @@ class Action extends OrmAbs
      * @param callable $callback callback function
      */
     public function fetch($callback){
-        $query = $this->genSelect().$this->genTable().$this->genWhere().$this->genGroup().$this->genOrder().$this->genLimit();
+        $query = $this->setSelect().$this->setTable().$this->setWhere().$this->setGroup().$this->setOrder().$this->setLimit();
         if (Property::reality($this->options[self::DEBUG])) {
             echo $query . PHP_EOL;
         }
@@ -223,7 +241,7 @@ class Action extends OrmAbs
             $column = $columnName;
         }
 
-        $query = "SELECT COUNT($column) ".$this->genTable().$this->genWhere().$this->genGroup().$this->genOrder().$this->genLimit();
+        $query = "SELECT COUNT($column) ".$this->setTable().$this->setWhere().$this->setGroup().$this->setOrder().$this->setLimit();
 
         if (Property::reality($this->options[self::DEBUG])) {
             echo $query . PHP_EOL;
@@ -239,7 +257,7 @@ class Action extends OrmAbs
      * @param callable $callback callback function
      */
     public function sum($columnName, $callback){
-        $query = "SELECT SUM($columnName) ".$this->genTable().$this->genWhere().$this->genGroup().$this->genOrder().$this->genLimit();
+        $query = "SELECT SUM($columnName) ".$this->setTable().$this->setWhere().$this->setGroup().$this->setOrder().$this->setLimit();
 
         if (Property::reality($this->options[self::DEBUG])) {
             echo $query . PHP_EOL;
@@ -261,7 +279,7 @@ class Action extends OrmAbs
      * @param callable $callback callback function
      */
     public function max($columnName, $callback){
-        $query = "SELECT MAX($columnName) ".$this->genTable().$this->genWhere().$this->genGroup().$this->genOrder().$this->genLimit();
+        $query = "SELECT MAX($columnName) ".$this->setTable().$this->setWhere().$this->setGroup().$this->setOrder().$this->setLimit();
         if (Property::reality($this->options[self::DEBUG])) {
             echo $query . PHP_EOL;
         }
@@ -281,7 +299,7 @@ class Action extends OrmAbs
      * @param callable $callback callback function
      */
     public function min($columnName, $callback){
-        $query = "SELECT MIN($columnName) ".$this->genTable().$this->genWhere().$this->genGroup().$this->genOrder().$this->genLimit();
+        $query = "SELECT MIN($columnName) ".$this->setTable().$this->setWhere().$this->setGroup().$this->setOrder().$this->setLimit();
         if (Property::reality($this->options[self::DEBUG])) {
             echo $query . PHP_EOL;
         }
@@ -302,7 +320,7 @@ class Action extends OrmAbs
      * @param callable $callback callback function
      */
     public function getBy($columnName, $value, $callback){
-        $query = self::SELECT .$this->genTable()."WHERE $columnName = '".addslashes($value)."'";
+        $query = $this->setSelect() . $this->setTable()."WHERE $columnName = '".addslashes($value)."'";
         if (Property::reality($this->options[self::DEBUG])) {
             echo $query . PHP_EOL;
         }
@@ -316,8 +334,8 @@ class Action extends OrmAbs
      * @param int $id Value of Primary Key
      * @param callable $callback callback function
      */
-    public function get($id, $callback){
-        if(is_array($id)){
+    public function get($id, $callback) {
+        if(is_array($id)) {
             $gets = clone $this;
             $gets->where($id)->fetch($callback);
 
@@ -331,7 +349,7 @@ class Action extends OrmAbs
                 $result = new Result($this->orm, $link, $result);
                 if($result->status && isset($result->results[0]['COLUMN_NAME'])){
                     $key    = $result->results[0]['COLUMN_NAME'];
-                    $query  = self::SELECT . $this->genTable() . "WHERE $key = '$id'";
+                    $query  = $this->setSelect() . $this->setTable() . "WHERE $key = '$id'";
 
                     if (Property::reality($this->options[self::DEBUG])) {
                         echo $query . PHP_EOL;
@@ -367,7 +385,7 @@ class Action extends OrmAbs
         if($sets != "") {
             $sets = substr($sets, 0, -2);
         }
-        $query = "UPDATE ".$this->getTable()." SET ".$sets." ".$this->genWhere().$this->genGroup().$this->genOrder().$this->genLimit();
+        $query = "UPDATE ".$this->getTable()." SET ".$sets." ".$this->setWhere().$this->setGroup().$this->setOrder().$this->setLimit();
 
         if (Property::reality($this->options[self::DEBUG])) {
             echo $query . PHP_EOL;
@@ -418,7 +436,7 @@ class Action extends OrmAbs
      * @param callable $callback callback function
      */
     public function delete($callback){
-        $query = "DELETE ".$this->genTable().$this->genWhere().$this->genGroup().$this->genOrder().$this->genLimit();
+        $query = "DELETE ".$this->setTable().$this->setWhere().$this->setGroup().$this->setOrder().$this->setLimit();
         if (Property::reality($this->options[self::DEBUG])) {
             echo $query . PHP_EOL;
         }

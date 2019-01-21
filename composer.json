@@ -15,6 +15,7 @@
     "kernelman/common" : ">=1.0.0",
     "kernelman/exceptions" : ">=1.0.0",
     "kernelman/message" : ">=1.0.0",
+    "kernelman/services" : ">=1.0.0",
     "swoft/swoole-ide-helper": "dev-master"
   },
   "require-dev": {
@@ -22,7 +23,8 @@
   },
   "autoload": {
     "psr-4": {
-      "Orm\\": "src/"
+      "Orm\\": "src/",
+      "Tests\\": "tests/"
     }
   },
   "minimum-stability": "dev"
