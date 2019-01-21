@@ -11,6 +11,12 @@
 namespace Orm;
 
 
+/**
+ * Trait Combined
+ * Combined action
+ *
+ * @package Orm
+ */
 trait Combined
 {
 
@@ -35,7 +41,6 @@ trait Combined
      * @return string
      */
     private function setTable() {
-
         return "FROM ". $this->getTable() . " ";
     }
 
@@ -117,9 +122,9 @@ trait Combined
         }
 
         if($this->limit[self::OFFSET] == 0) {
-            return "LIMIT ". $this->limit[self::NUM] . " ";
+            return "LIMIT " . $this->limit[self::NUM] . " ";
         }
 
-        return "LIMIT ". $this->limit[self::OFFSET] . "," . $this->limit[self::NUM] . " ";
+        return "LIMIT " . $this->limit[self::OFFSET] . "," . $this->limit[self::NUM] . " ";
     }
 }
