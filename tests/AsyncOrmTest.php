@@ -11,17 +11,19 @@
 namespace Tests;
 
 
-use Orm\Orm;
+use Orm\AsyncOrm;
 use Services\Config;
 
-class UserTest extends TestCase {
+class AsyncOrmTest extends TestCase {
 
+    /**
+     * @throws \Exceptions\NotFoundException
+     */
     public function testGetUser() {
-        $config = Config::mysql()::got();
+        $config = (array)Config::mysql()::got();
         $id     = 30;
-        $orm    = new Orm();
-        $conf   = (array)$config;
-        $orm->connect((array)$conf, function ($result) use($orm, $id) {
+        $orm    = new AsyncOrm();
+        $orm->connect($config, function ($result) use($orm, $id) {
 
             if($result->status) {
                 $orm->table('users')->select('id, username')->get($id, function ($result) {
@@ -42,31 +44,32 @@ class UserTest extends TestCase {
                 exit($result->errorCode);
             }
         });
-        $orm->disconnect();
+        $orm->close();
 
         $id = 1;
-        $orm->connect((array)$conf, function ($result) use($orm, $id) {
+        $orm->connect($config, function ($result) use($orm, $id) {
 
             if ($result->status) {
                 // Use string to where test
-                $orm->table('admins')->select('id, username')->where("id = $id")->fetch(function ($result) {
+                $orm->table('admins')->select('id, username')->where("id = $id")->find(function ($result) {
                     $this->assertEquals('1', (int)$result->results[0]['id']);
                     exit($result->errorCode);
                 });
             }
         });
-        $orm->disconnect();
+        $orm->close();
 
         $id = 1;
-        $orm->connect((array)$conf, function ($result) use($orm, $id) {
+        $orm->connect($config, function ($result) use($orm, $id) {
 
             if ($result->status) {
                 // Use array to where
-                $orm->table('admins')->select('id, username')->where([ 'id' => $id ])->fetch(function ($result) {
+                $orm->table('admins')->select('id, username')->where([ 'id' => $id ])->find(function ($result) {
                     $this->assertEquals('1', (int)$result->results[0]['id']);
                     exit($result->errorCode);
                 });
             }
         });
+        $orm->close();
     }
 }

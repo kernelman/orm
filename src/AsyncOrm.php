@@ -11,48 +11,55 @@
 namespace Orm;
 
 
-class Orm extends OrmAbs
+use Exceptions\NotFoundException;
+
+class AsyncOrm extends OrmAbs
 {
     public function __construct() {
+        // Check swoole extension
+        if (!extension_loaded('swoole')) {
+            throw new NotFoundException('The swoole extension can not loaded.');
+        }
+
         $this->connect = new \swoole_mysql();
     }
 
     /**
      * Connect to server
      *
-     * @param array $server
-     * @param callable $callback callback function
+     * @param $config
+     * @param callable $callback function
      */
-    public function connect($server, $callback) {
-        $this->options = $server;
-        $this->connect->connect($server, function(\swoole_mysql $db, $result) use ($callback) {
-            $callback(new Result($this, $db, $result, true));
+    public function connect($config, $callback) {
+        $this->options = $config;
+        $this->connect->connect($config, function(\swoole_mysql $db, $result) use ($callback) {
+            $callback(new Result($this, $result, $db, true));
         });
     }
 
     /**
-     *  Disconnect
+     *  Close connect.
      */
-    public function disconnect() {
+    public function close() {
         $this->connect->close();
     }
 
     /**
      * @param $name
-     * @return Action
+     * @return AsyncAction
      */
     public function __get($name) {
-        return new Action($this, $name);
+        return new AsyncAction($this, $name);
     }
 
     /**
      * Get table object
      *
      * @param $name
-     * @return Action
+     * @return AsyncAction
      */
     public function table($name) {
-        return new Action($this, $name);
+        return new AsyncAction($this, $name);
     }
 
     /**
@@ -67,7 +74,7 @@ class Orm extends OrmAbs
                 $result = $link->affected_rows;
             }
 
-            $callback(new Result($this, $link, $result));
+            $callback(new Result($this, $result, $link));
         });
     }
 
@@ -78,7 +85,7 @@ class Orm extends OrmAbs
      */
     public function begin($callback){
         $this->connect->begin(function(\swoole_mysql $link, $result) use ($callback){
-            $callback(new Result($this, $link, $result));
+            $callback(new Result($this, $result, $link));
         });
     }
 
@@ -89,7 +96,7 @@ class Orm extends OrmAbs
      */
     public function commit($callback){
         $this->connect->commit(function(\swoole_mysql $link, $result) use ($callback){
-            $callback(new Result($this, $link, $result));
+            $callback(new Result($this, $result, $link));
         });
     }
 
@@ -100,7 +107,7 @@ class Orm extends OrmAbs
      */
     public function rollback($callback){
         $this->connect->rollback(function(\swoole_mysql $link, $result) use ($callback){
-            $callback(new Result($this, $link, $result));
+            $callback(new Result($this, $result, $link));
         });
     }
 }

@@ -10,6 +10,7 @@
 
 return (object)[
 
+    'maxNum'    => 100,         // Connection pool max size
     'host'      => '127.0.0.1',
     'port'      => 3306,
     'user'      => 'user',

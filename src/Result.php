@@ -23,16 +23,46 @@ class Result extends OrmAbs
     /**
      * Result constructor.
      *
-     * @param $orm
-     * @param $link
+     * @param $orm object
      * @param $results
+     * @param $link AsyncOrm required assign value, CoRoutineOrm no need to assign value.
      * @param bool $connect
      */
-    public function __construct($orm, $link, $results, $connect = false) {
+    public function __construct($orm, $results, $link = null, $connect = false) {
         $this->orm      = $orm;
         $this->links    = $link;
         $this->results  = $results;
         $this->connect  = $connect;
+    }
+
+    /**
+     * @return bool|object
+     */
+    public function toObject() {
+        if (Property::reality($this->results)) {
+
+            if (count($this->results) === 1) {
+                return (object)$this->results[0];
+            }
+            return (object)$this->results;
+        }
+
+        return false;
+    }
+
+    /**
+     * @return bool|object
+     */
+    public function toArray() {
+        if (Property::reality($this->results)) {
+
+            if (count($this->results) === 1) {
+                return $this->results[0];
+            }
+            return $this->results;
+        }
+
+        return false;
     }
 
     /**

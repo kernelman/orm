@@ -1,6 +1,6 @@
 <?php
 /**
- * Class Action
+ * Class CoRoutineAction
  *
  * Author:  Kernel Huang
  * Mail:    kernelman79@gmail.com
@@ -13,7 +13,7 @@ namespace Orm;
 
 use Common\Property;
 
-class Action extends OrmAbs
+class CoRoutineAction extends OrmAbs
 {
     use Combined;
 
@@ -38,10 +38,10 @@ class Action extends OrmAbs
     protected const SELECT  = 'SELECT * ';
 
     /**
-     * Action constructor.
-     *
+     * CoRoutineAction constructor.
      * @param $orm
      * @param $table
+     * @throws \Exceptions\NotFoundException
      */
     public function __construct($orm, $table) {
         OrmAbs::__construct();
@@ -57,6 +57,13 @@ class Action extends OrmAbs
         $this->group    = [];
     }
 
+    /**
+     * @param $where
+     * @param $clause
+     * @param $side
+     * @param $type
+     * @return mixed
+     */
     private function wherePush($where, $clause, $side, $type) {
         array_push($where, [
                 self::TYPE      => $type,
@@ -72,8 +79,8 @@ class Action extends OrmAbs
      * Structures Where
      *
      * @param array|string $clause where clause
-     * @param array ...$side
-     * @return Action
+     * @param mixed ...$side
+     * @return CoRoutineAction
      */
     public function where($clause, ...$side) {
         $wheres = clone $this;
@@ -99,7 +106,7 @@ class Action extends OrmAbs
      *
      * @param array|string $clause or clause
      * @param array ...$side
-     * @return Action
+     * @return CoRoutineAction
      */
     public function whereOr($clause, ...$side) {
         $wheres = clone $this;
@@ -122,7 +129,7 @@ class Action extends OrmAbs
      * Structures select
      *
      * @param array|string $fields fields to select
-     * @return Action
+     * @return CoRoutineAction
      */
     public function select($fields) {
         $selects = clone $this;
@@ -138,7 +145,7 @@ class Action extends OrmAbs
      * Structures order
      *
      * @param string|array $fields rules for sorting
-     * @return Action
+     * @return CoRoutineAction
      */
     public function order($fields) {
         $orders = clone $this;
@@ -155,7 +162,7 @@ class Action extends OrmAbs
      *
      * @param int $num number
      * @param int $offset offset
-     * @return Action
+     * @return CoRoutineAction
      */
     public function limit($num, $offset = 0) {
         $limits = clone $this;
@@ -172,7 +179,7 @@ class Action extends OrmAbs
      *
      * @param string $by by field
      * @param null $having having clause
-     * @return Action
+     * @return CoRoutineAction
      */
     public function group($by, $having = null) {
         $groups = clone $this;
@@ -197,19 +204,17 @@ class Action extends OrmAbs
     }
 
     /**
-     * Fetch all select Results
+     * Find all select Results
      *
-     * @param callable $callback callback function
      */
-    public function fetch($callback){
+    public function find() {
         $query = $this->setSelect().$this->setTable().$this->setWhere().$this->setGroup().$this->setOrder().$this->setLimit();
         if (Property::reality($this->options[self::DEBUG])) {
             echo $query . PHP_EOL;
         }
 
-        $this->connect->query($query, function(\swoole_mysql $link, $result) use ($callback){
-            $callback(new Result($this->orm, $link, $result));
-        });
+        $result = $this->connect->query($query);
+        return new Result($this->orm, $result);
     }
 
     /**
@@ -232,7 +237,7 @@ class Action extends OrmAbs
         }
 
         $this->connect->query($query, function(\swoole_mysql $link, $result) use ($callback) {
-            $callback(new Result($this->orm, $link, $result));
+            $callback(new Result($this->orm, $result));
         });
     }
 
@@ -250,11 +255,11 @@ class Action extends OrmAbs
         $this->connect->query($query, function(\swoole_mysql $link, $result) use ($callback) {
 
             if(!$result) {
-                return $callback(new Result($this->orm, $link, $result));
+                return $callback(new Result($this->orm, $result));
             }
 
             $result = Structures::makeResult($result[0], true);
-            return $callback(new Result($this->orm, $link, $result));
+            return $callback(new Result($this->orm, $result));
         });
     }
 
@@ -270,17 +275,17 @@ class Action extends OrmAbs
 
         $this->connect->query($query, function(\swoole_mysql $link, $result) use ($callback){
             if(!$result) {
-                return $callback(new Result($this->orm, $link, $result));
+                return $callback(new Result($this->orm, $result));
             }
 
             $result = Structures::makeResult($result[0]);
-            return $callback(new Result($this->orm, $link, $result));
+            return $callback(new Result($this->orm, $result));
         });
     }
 
     /**
      * @param string $columnName column to get min in
-     * @param callable $callback callback function
+     * @param callable $callback function
      */
     public function min($columnName, $callback){
         $query = "SELECT MIN($columnName) ".$this->setTable().$this->setWhere().$this->setGroup().$this->setOrder().$this->setLimit();
@@ -290,18 +295,18 @@ class Action extends OrmAbs
 
         $this->connect->query($query, function(\swoole_mysql $link, $result) use ($callback){
             if(!$result) {
-                return $callback(new Result($this->orm, $link, $result));
+                return $callback(new Result($this->orm, $result));
             }
 
             $result = Structures::makeResult($result[0]);
-            return $callback(new Result($this->orm, $link, $result));
+            return $callback(new Result($this->orm, $result));
         });
     }
 
     /**
      * @param string $columnName by column
      * @param mixed $value value to search for
-     * @param callable $callback callback function
+     * @param callable $callback function
      */
     public function getBy($columnName, $value, $callback){
         $query = $this->setSelect() . $this->setTable()."WHERE $columnName = '".addslashes($value)."'";
@@ -310,56 +315,63 @@ class Action extends OrmAbs
         }
 
         $this->connect->query($query, function(\swoole_mysql $link, $result) use ($callback) {
-            $callback(new Result($this->orm, $link, $result));
+            $callback(new Result($this->orm, $result));
         });
     }
 
     /**
-     * @param int $id Value of Primary Key
-     * @param callable $callback callback function
+     * @param $id
+     * @return bool|Result
      */
-    public function get($id, $callback) {
+    public function get($id) {
         if(is_array($id)) {
             $gets = clone $this;
-            $gets->where($id)->fetch($callback);
+            return $gets->where($id)->find();
+        }
 
-        } else{
+        if (is_string($id) || is_int($id)) {
             $query = "SELECT COLUMN_NAME FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_SCHEMA = '".$this->options['database']."' AND TABLE_NAME = '".$this->getTable()."' AND COLUMN_KEY = 'PRI'";
+
             if (Property::reality($this->options[self::DEBUG])) {
                 echo $query . PHP_EOL;
             }
 
-            $this->connect->query($query, function(\swoole_mysql $link, $result) use ($callback, $id){
-                $result = new Result($this->orm, $link, $result);
-                if($result->status && isset($result->results[0]['COLUMN_NAME'])){
-                    $key    = $result->results[0]['COLUMN_NAME'];
+            $query  = $this->connect->query($query);
+            $result = new Result($this->orm, $query);
+
+            if($result->status) {
+
+                $to     = $result->toObject();
+                $key    = Property::reality($to->COLUMN_NAME);
+
+                if ($key) {
+
                     $query  = $this->setSelect() . $this->setTable() . "WHERE $key = '$id'";
-
-                    if (Property::reality($this->options[self::DEBUG])) {
+                     if (Property::reality($this->options[self::DEBUG])) {
                         echo $query . PHP_EOL;
-                    }
+                     }
 
-                    $this->connect->query($query, function(\swoole_mysql $link, $result) use ($callback){
-                        $callback(new Result($this->orm, $link, $result));
-                    });
-
-                } else{
-                    $callback($result);
+                     $queryId = $this->connect->query($query);
+                     return new Result($this->orm, $queryId);
                 }
-            });
+            }
+
+            return $result;
         }
+
+        return new Result($this->orm, false);
     }
 
     /**
      * @param array $data data for update
      * @param callable $callback callback function
      */
-    public function update($data, $callback){
+    public function update($data, $callback) {
         $sets = "";
         $keys = array_keys($data);
 
         foreach ($keys as $key){
-            if(gettype($data[$key]) != "object"){
+            if(gettype($data[$key]) != "object") {
                 $sets.= $key." = '".addslashes($data[$key])."', ";
             }else{
                 $sets.= $key.($data[$key]->call()).", ";
@@ -379,12 +391,12 @@ class Action extends OrmAbs
             if(!$result){
                 $result = $link->affected_rows;
             }
-            $callback(new Result($this->orm, $link, $result));
+            $callback(new Result($this->orm, $result));
         });
     }
 
     /**
-     * @param array $data data to insert
+     * @param array $data to insert
      * @param callable $callback callback function
      */
     public function insert($data, $callback){
@@ -412,12 +424,12 @@ class Action extends OrmAbs
             if(!$result){
                 $result = $link->affected_rows;
             }
-            $callback(new Result($this->orm, $link, $result));
+            $callback(new Result($this->orm, $result));
         });
     }
 
     /**
-     * @param callable $callback callback function
+     * @param callable $callback function
      */
     public function delete($callback){
         $query = "DELETE ".$this->setTable().$this->setWhere().$this->setGroup().$this->setOrder().$this->setLimit();
@@ -429,7 +441,7 @@ class Action extends OrmAbs
             if(!$result){
                 $result = $link->affected_rows;
             }
-            $callback(new Result($this->orm, $link, $result));
+            $callback(new Result($this->orm, $result));
         });
     }
 
@@ -438,7 +450,7 @@ class Action extends OrmAbs
      * @param $arguments
      */
     public function __call($name, $arguments) {
-        if(strpos($name, "getBy") == 0 && sizeof($arguments) == 2) {
+        if(strpos($name, "getBy") == 0 && count($arguments) == 2) {
             $columns    = substr($name, 5);
             $columns[0] = strtolower($columns[0]);
 

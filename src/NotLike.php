@@ -15,6 +15,8 @@ class NotLike extends Modifier
 {
 
     /**
+     * Call not like structures
+     *
      * @return string
      */
     public function call() {

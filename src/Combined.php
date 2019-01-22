@@ -24,7 +24,7 @@ trait Combined
      * @return string
      */
     private function setSelect() {
-        if(sizeof($this->select) == 0){
+        if(count($this->select) == 0){
             return self::SELECT;
         }
 
@@ -48,7 +48,7 @@ trait Combined
      * @return string
      */
     private function setWhere() {
-        if(sizeof($this->where) == 0) {
+        if(count($this->where) == 0) {
             return "";
         }
 
@@ -84,7 +84,7 @@ trait Combined
      * @return string
      */
     private function setGroup() {
-        if(sizeof($this->group) == 0) {
+        if(count($this->group) == 0) {
             return "";
         }
 
@@ -100,7 +100,7 @@ trait Combined
      * @return string
      */
     private function setOrder() {
-        if(sizeof($this->order) == 0){
+        if(count($this->order) == 0){
             return "";
         }
 
@@ -117,7 +117,7 @@ trait Combined
      * @return string
      */
     private function setLimit() {
-        if(sizeof($this->limit) == 0){
+        if(count($this->limit) == 0){
             return '';
         }
 
