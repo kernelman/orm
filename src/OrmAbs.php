@@ -13,8 +13,8 @@ namespace Orm;
 abstract class OrmAbs
 {
 
-    protected $connect;
-    protected $options;
+    public $connect;
+    public $options;
 
     /**
      * OrmAbs constructor.

@@ -47,7 +47,7 @@ trait Combined
     /**
      * @return string
      */
-    private function setWhere(){
+    private function setWhere() {
         if(sizeof($this->where) == 0) {
             return "";
         }
@@ -59,17 +59,17 @@ trait Combined
                 $addon = "";
             }
 
-            if(is_array($item[self::SIDE])){
+            if(is_array($item[self::SIDE])) {
                 $wheres.=$addon.$item[self::CLAUSE]." ";
 
                 foreach ($item[self::SIDE] as $sideItem) {
-                    $wheres = Structures::strReplace("?", "'".addslashes($sideItem)."'", $wheres);
+                    $wheres = Structures::strReplace("?", "'" . addslashes($sideItem) . "'", $wheres);
                 }
 
             } else{
 
                 if(gettype($item[self::SIDE]) != "object") {
-                    $wheres .= $addon.$item[self::CLAUSE] . " = '" .addslashes($item[self::SIDE]) . "' ";
+                    $wheres .= $addon.$item[self::CLAUSE] . " = '" . addslashes($item[self::SIDE]) . "' ";
 
                 } else{
                     $wheres .= $addon . $item[self::CLAUSE] . ($item[self::SIDE]->call()) . " ";
