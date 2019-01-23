@@ -79,14 +79,14 @@ class AsyncAction extends OrmAbs
         if(is_string($clause) && is_array($side)) {
 
             if (count($side) === 1) {
-                $makeSide = $side[0];
-                $wheres->where = $this->wherePush($wheres->where, $clause, $makeSide, self::AND);
+                $makeSide       = $side[0];
+                $wheres->where  = $this->wherePush($wheres->where, $clause, $makeSide, self::AND);
             }
 
             if (count($side) === 2) {
-                $symbol     = $side[0];
-                $makeSide   = $side[1];
-                $wheres->where = $this->wherePush($wheres->where, $clause, $makeSide, self::AND, $symbol);
+                $symbol         = $side[0];
+                $makeSide       = $side[1];
+                $wheres->where  = $this->wherePush($wheres->where, $clause, $makeSide, self::AND, $symbol);
             }
         }
 
