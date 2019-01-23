@@ -27,7 +27,7 @@ class AsyncOrmTest extends TestCase {
 
             if($result->status) {
                 $orm->table('users')->select('id, username')->get($id, function ($result) {
-                    $this->assertEquals('30', (int)$result->results[0]['id']);
+                    $this->assertEquals(30, (int)$result->results[0]['id']);
                     exit($result->errorCode);
                 });
             }
@@ -52,7 +52,7 @@ class AsyncOrmTest extends TestCase {
             if ($result->status) {
                 // Use string to where test
                 $orm->table('admins')->select('id, username')->where("id = $id")->find(function ($result) {
-                    $this->assertEquals('1', (int)$result->results[0]['id']);
+                    $this->assertEquals(1, (int)$result->results[0]['id']);
                     exit($result->errorCode);
                 });
             }
@@ -65,7 +65,7 @@ class AsyncOrmTest extends TestCase {
             if ($result->status) {
                 // Use array to where
                 $orm->table('admins')->select('id, username')->where([ 'id' => $id ])->find(function ($result) {
-                    $this->assertEquals('1', (int)$result->results[0]['id']);
+                    $this->assertEquals(1, (int)$result->results[0]['id']);
                     exit($result->errorCode);
                 });
             }
