@@ -322,8 +322,9 @@ class AsyncAction extends OrmAbs
         if(is_array($id)) {
             $gets = clone $this;
             $gets->where($id)->find($callback);
+        }
 
-        } else{
+        if (is_string($id) || is_int($id)) {
             $query = "SELECT COLUMN_NAME FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_SCHEMA = '".$this->options['database']."' AND TABLE_NAME = '".$this->getTable()."' AND COLUMN_KEY = 'PRI'";
             if (Property::reality($this->options[self::DEBUG])) {
                 echo $query . PHP_EOL;

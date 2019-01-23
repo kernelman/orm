@@ -16,7 +16,7 @@ use Services\Config;
 
 class CoRoutineOrmTest extends TestCase {
 
-    public function testUser() {
+    public function testGetUser() {
         $conf = (array)Config::mysqlpool()::got();
 
         go (function () use ($conf) {

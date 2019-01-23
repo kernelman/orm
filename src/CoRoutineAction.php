@@ -41,7 +41,6 @@ class CoRoutineAction extends OrmAbs
      * CoRoutineAction constructor.
      * @param $orm
      * @param $table
-     * @throws \Exceptions\NotFoundException
      */
     public function __construct($orm, $table) {
         OrmAbs::__construct();
