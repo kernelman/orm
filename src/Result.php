@@ -42,16 +42,16 @@ class Result extends OrmAbs
         if (Property::reality($this->results)) {
 
             if (count($this->results) === 1) {
-                return json_decode(json_encode($this->results[0]));
+                return (object)$this->results;
             }
-            return (object)$this->results;
+            return json_decode(json_encode($this->results));
         }
 
         return false;
     }
 
     /**
-     * @return bool|object
+     * @return bool|array
      */
     public function toArray() {
         if (Property::reality($this->results)) {
