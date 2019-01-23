@@ -36,13 +36,13 @@ class Result extends OrmAbs
     }
 
     /**
-     * @return bool|object
+     * @return bool|mixed|object
      */
     public function toObject() {
         if (Property::reality($this->results)) {
 
             if (count($this->results) === 1) {
-                return (object)$this->results[0];
+                return json_decode(json_encode($this->results[0]));
             }
             return (object)$this->results;
         }
