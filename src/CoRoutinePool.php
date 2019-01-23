@@ -26,9 +26,9 @@ class CoRoutinePool
      * @throws UnconnectedException
      */
     private function initialize($config) {
-        $this->pool = new \chan($config['maxNum']);  // Create container pool for channel.
+        $this->pool = new \chan($config['maxSize']);  // Create container pool for channel.
 
-        for ($i = 0; $i < $config['maxNum']; $i++) {
+        for ($i = 0; $i < $config['maxSize']; $i++) {
             $connect = new \Swoole\Coroutine\MySQL();
             $connect->connect($config);
 

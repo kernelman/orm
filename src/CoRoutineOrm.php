@@ -55,7 +55,6 @@ class CoRoutineOrm extends OrmAbs
     /**
      * @param $name
      * @return CoRoutineAction
-     * @throws NotFoundException
      */
     public function __get($name) {
         return new CoRoutineAction($this, $name);
@@ -66,7 +65,6 @@ class CoRoutineOrm extends OrmAbs
      *
      * @param $name
      * @return CoRoutineAction
-     * @throws NotFoundException
      */
     public function table($name) {
         return new CoRoutineAction($this, $name);
