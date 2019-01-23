@@ -34,4 +34,33 @@ abstract class OrmAbs
 
         return $string;
     }
+
+    /**
+     * @param $result
+     * @param $orm
+     * @param bool $zero
+     * @return Result
+     */
+    protected function getMakeResult($result, $orm, $zero) {
+
+        if(!$result) {
+            return new Result($orm, $result);
+        }
+
+        $result = Structures::makeResult($result[0], $zero);
+        return new Result($orm, $result);
+    }
+
+    /**
+     * @param $result
+     * @param $orm
+     * @return Result
+     */
+    protected function getAffectedRows($result, $orm) {
+        if(!$result) {
+            $result = $this->connect->affected_rows;
+        }
+
+        return new Result($orm, $result);
+    }
 }

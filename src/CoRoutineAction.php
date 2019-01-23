@@ -12,6 +12,7 @@ namespace Orm;
 
 
 use Common\Property;
+use Exceptions\InvalidArgumentException;
 
 class CoRoutineAction extends OrmAbs
 {
@@ -217,110 +218,91 @@ class CoRoutineAction extends OrmAbs
     }
 
     /**
-     * @param string $columnName column to count
-     * @param string $callback callback function
+     * Count column
+     *
+     * @param string $columnName
+     * @return Result
      */
-    public function count($columnName, $callback = "") {
-        if($callback == "") {
-            $callback   = $columnName;
-            $column     = "*";
+    public function count($columnName = '*') {
 
-        } else {
-            $column = $columnName;
-        }
-
-        $query = "SELECT COUNT($column) ".$this->setTable().$this->setWhere().$this->setGroup().$this->setOrder().$this->setLimit();
+        $query = "SELECT COUNT($columnName) ".$this->setTable().$this->setWhere().$this->setGroup().$this->setOrder().$this->setLimit();
 
         if (Property::reality($this->options[self::DEBUG])) {
             echo $query . PHP_EOL;
         }
 
-        $this->connect->query($query, function(\swoole_mysql $link, $result) use ($callback) {
-            $callback(new Result($this->orm, $result));
-        });
+        $result = $this->connect->query($query);
+        return new Result($this->orm, $result);
     }
 
     /**
-     * @param string $columnName column to sum
-     * @param callable $callback callback function
+     * Sum column
+     *
+     * @param string $columnName
+     * @return Result
      */
-    public function sum($columnName, $callback){
-        $query = "SELECT SUM($columnName) ".$this->setTable().$this->setWhere().$this->setGroup().$this->setOrder().$this->setLimit();
+    public function sum($columnName) {
+        $query = "SELECT SUM($columnName) ". $this->setTable() . $this->setWhere() . $this->setGroup() . $this->setOrder() . $this->setLimit();
 
         if (Property::reality($this->options[self::DEBUG])) {
             echo $query . PHP_EOL;
         }
 
-        $this->connect->query($query, function(\swoole_mysql $link, $result) use ($callback) {
-
-            if(!$result) {
-                return $callback(new Result($this->orm, $result));
-            }
-
-            $result = Structures::makeResult($result[0], true);
-            return $callback(new Result($this->orm, $result));
-        });
+        $result = $this->connect->query($query);
+        return $this->getMakeResult($result, $this->orm, true);
     }
 
     /**
-     * @param string $columnName column to get max in
-     * @param callable $callback callback function
+     * Get max in
+     *
+     * @param string $columnName
+     * @return Result
      */
-    public function max($columnName, $callback){
+    public function max($columnName) {
         $query = "SELECT MAX($columnName) ".$this->setTable().$this->setWhere().$this->setGroup().$this->setOrder().$this->setLimit();
         if (Property::reality($this->options[self::DEBUG])) {
             echo $query . PHP_EOL;
         }
 
-        $this->connect->query($query, function(\swoole_mysql $link, $result) use ($callback){
-            if(!$result) {
-                return $callback(new Result($this->orm, $result));
-            }
-
-            $result = Structures::makeResult($result[0]);
-            return $callback(new Result($this->orm, $result));
-        });
+        $result = $this->connect->query($query);
+        return $this->getMakeResult($result, $this->orm, false);
     }
 
     /**
-     * @param string $columnName column to get min in
-     * @param callable $callback function
+     * @param $columnName
+     * @return Result
      */
-    public function min($columnName, $callback){
+    public function min($columnName) {
         $query = "SELECT MIN($columnName) ".$this->setTable().$this->setWhere().$this->setGroup().$this->setOrder().$this->setLimit();
         if (Property::reality($this->options[self::DEBUG])) {
             echo $query . PHP_EOL;
         }
 
-        $this->connect->query($query, function(\swoole_mysql $link, $result) use ($callback){
-            if(!$result) {
-                return $callback(new Result($this->orm, $result));
-            }
-
-            $result = Structures::makeResult($result[0]);
-            return $callback(new Result($this->orm, $result));
-        });
+        $result = $this->connect->query($query);
+        return $this->getMakeResult($result, $this->orm, false);
     }
 
     /**
-     * @param string $columnName by column
-     * @param mixed $value value to search for
-     * @param callable $callback function
+     * Get by for column
+     *
+     * @param $columnName
+     * @param $value
+     * @return Result
      */
-    public function getBy($columnName, $value, $callback){
+    public function getBy($columnName, $value) {
         $query = $this->setSelect() . $this->setTable()."WHERE $columnName = '".addslashes($value)."'";
         if (Property::reality($this->options[self::DEBUG])) {
             echo $query . PHP_EOL;
         }
 
-        $this->connect->query($query, function(\swoole_mysql $link, $result) use ($callback) {
-            $callback(new Result($this->orm, $result));
-        });
+        $result = $this->connect->query($query);
+        return new Result($this->orm, $result);
     }
 
     /**
      * @param $id
-     * @return bool|Result
+     * @return Result
+     * @throws InvalidArgumentException
      */
     public function get($id) {
         if(is_array($id)) {
@@ -358,21 +340,22 @@ class CoRoutineAction extends OrmAbs
             return $result;
         }
 
-        return new Result($this->orm, false);
+        throw new InvalidArgumentException('Id parameter type can only be string, integer, array');
     }
 
     /**
-     * @param array $data data for update
-     * @param callable $callback callback function
+     * @param $data
+     * @return Result
      */
-    public function update($data, $callback) {
+    public function update($data) {
         $sets = "";
         $keys = array_keys($data);
 
         foreach ($keys as $key){
             if(gettype($data[$key]) != "object") {
                 $sets.= $key." = '".addslashes($data[$key])."', ";
-            }else{
+
+            } else{
                 $sets.= $key.($data[$key]->call()).", ";
             }
         }
@@ -386,22 +369,20 @@ class CoRoutineAction extends OrmAbs
             echo $query . PHP_EOL;
         }
 
-        $this->connect->query($query, function(\swoole_mysql $link, $result) use ($callback){
-            if(!$result){
-                $result = $link->affected_rows;
-            }
-            $callback(new Result($this->orm, $result));
-        });
+        $result = $this->connect->query($query);
+        return $this->getAffectedRows($result, $this->orm);
     }
 
     /**
-     * @param array $data to insert
-     * @param callable $callback callback function
+     * @param $data
+     * @return Result
      */
-    public function insert($data, $callback){
-        $fields = ""; $values = "";
-        $keys = array_keys($data);
-        foreach ($keys as $key){
+    public function insert($data) {
+        $fields = "";
+        $values = "";
+        $keys   = array_keys($data);
+
+        foreach ($keys as $key) {
             $fields.= $key.", ";
             $values.= "'".addslashes($data[$key])."', ";
         }
@@ -419,29 +400,21 @@ class CoRoutineAction extends OrmAbs
             echo $query . PHP_EOL;
         }
 
-        $this->connect->query($query, function(\swoole_mysql $link, $result) use ($callback){
-            if(!$result){
-                $result = $link->affected_rows;
-            }
-            $callback(new Result($this->orm, $result));
-        });
+        $result = $this->connect->query($query);
+        return $this->getAffectedRows($result, $this->orm);
     }
 
     /**
-     * @param callable $callback function
+     * @return Result
      */
-    public function delete($callback){
+    public function delete() {
         $query = "DELETE ".$this->setTable().$this->setWhere().$this->setGroup().$this->setOrder().$this->setLimit();
         if (Property::reality($this->options[self::DEBUG])) {
             echo $query . PHP_EOL;
         }
 
-        $this->connect->query($query, function(\swoole_mysql $link, $result) use ($callback){
-            if(!$result){
-                $result = $link->affected_rows;
-            }
-            $callback(new Result($this->orm, $result));
-        });
+        $result = $this->connect->query($query);
+        return $this->getAffectedRows($result, $this->orm);
     }
 
     /**
@@ -456,9 +429,9 @@ class CoRoutineAction extends OrmAbs
             for($i = 0; $i<strlen($columns); ++$i) {
                 $column = strtolower($columns[$i]);
 
-                if($column !=$columns[$i]) {
-                    $columns[$i] = $column;
-                    $columns = substr_replace($columns,"_", $i,0);
+                if($column != $columns[$i]) {
+                    $columns[$i]    = $column;
+                    $columns        = substr_replace($columns,"_", $i,0);
                     $i++;
                 }
             }
