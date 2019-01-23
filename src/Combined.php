@@ -69,7 +69,7 @@ trait Combined
 
             } else{
 
-                if(gettype($item[self::SIDE]) != "object") {
+                if(!is_object($item[self::SIDE])) {
                     $wheres .= $addon.$item[self::CLAUSE] . " = '" . addslashes($item[self::SIDE]) . "' ";
 
                 } else{

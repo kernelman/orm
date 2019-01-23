@@ -352,7 +352,7 @@ class CoRoutineAction extends OrmAbs
         $keys = array_keys($data);
 
         foreach ($keys as $key){
-            if(gettype($data[$key]) != "object") {
+            if(!is_object($data[$key])) {
                 $sets.= $key." = '".addslashes($data[$key])."', ";
 
             } else{
