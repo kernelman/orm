@@ -37,6 +37,7 @@ class CoRoutineAction extends OrmAbs
     protected const OFFSET  = 'offset';
     protected const HAVING  = 'having';
     protected const SELECT  = 'SELECT * ';
+    protected const SYMBOL  = 'symbol';
 
     /**
      * CoRoutineAction constructor.
@@ -58,24 +59,6 @@ class CoRoutineAction extends OrmAbs
     }
 
     /**
-     * @param $where
-     * @param $clause
-     * @param $side
-     * @param $type
-     * @return mixed
-     */
-    private function wherePush($where, $clause, $side, $type) {
-        array_push($where, [
-                self::TYPE      => $type,
-                self::CLAUSE    => $clause,
-                self::SIDE      => $side
-            ]
-        );
-
-        return $where;
-    }
-
-    /**
      * Structures Where
      *
      * @param array|string $clause where clause
@@ -94,8 +77,18 @@ class CoRoutineAction extends OrmAbs
             }
         }
 
-        if(is_string($clause)) {
-            $wheres->where = $this->wherePush($wheres->where, $clause, $side, self::AND);
+        if(is_string($clause) && is_array($side)) {
+
+            if (count($side) === 1) {
+                $makeSide = $side[0];
+                $wheres->where = $this->wherePush($wheres->where, $clause, $makeSide, self::AND);
+            }
+
+            if (count($side) === 2) {
+                $symbol     = $side[0];
+                $makeSide   = $side[1];
+                $wheres->where = $this->wherePush($wheres->where, $clause, $makeSide, self::AND, $symbol);
+            }
         }
 
         return $wheres;
@@ -118,8 +111,18 @@ class CoRoutineAction extends OrmAbs
             }
         }
 
-        if(is_string($clause)) {
-            $wheres->where = $this->wherePush($wheres->where, $clause, $side, self::OR);
+        if(is_string($clause) && is_array($side)) {
+
+            if (count($side) === 1) {
+                $makeSide       = $side[0];
+                $wheres->where  = $this->wherePush($wheres->where, $clause, $makeSide, self::OR);
+            }
+
+            if (count($side) === 2) {
+                $symbol         = $side[0];
+                $makeSide       = $side[1];
+                $wheres->where  = $this->wherePush($wheres->where, $clause, $makeSide, self::OR, $symbol);
+            }
         }
 
         return $wheres;
@@ -328,12 +331,12 @@ class CoRoutineAction extends OrmAbs
                 if ($key) {
 
                     $query  = $this->setSelect() . $this->setTable() . "WHERE $key = '$id'";
-                     if (Property::reality($this->options[self::DEBUG])) {
+                    if (Property::reality($this->options[self::DEBUG])) {
                         echo $query . PHP_EOL;
-                     }
+                    }
 
-                     $queryId = $this->connect->query($query);
-                     return new Result($this->orm, $queryId);
+                    $queryId = $this->connect->query($query);
+                    return new Result($this->orm, $queryId);
                 }
             }
 
@@ -352,7 +355,7 @@ class CoRoutineAction extends OrmAbs
         $keys = array_keys($data);
 
         foreach ($keys as $key){
-            if(!is_object($data[$key])) {
+            if(gettype($data[$key]) != "object") {
                 $sets.= $key." = '".addslashes($data[$key])."', ";
 
             } else{

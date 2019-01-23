@@ -57,17 +57,6 @@ class AsyncAction extends OrmAbs
         $this->group    = [];
     }
 
-    private function wherePush($where, $clause, $side, $type) {
-        array_push($where, [
-                self::TYPE      => $type,
-                self::CLAUSE    => $clause,
-                self::SIDE      => $side
-            ]
-        );
-
-        return $where;
-    }
-
     /**
      * Structures Where
      *
@@ -87,8 +76,18 @@ class AsyncAction extends OrmAbs
             }
         }
 
-        if(is_string($clause)) {
-            $wheres->where = $this->wherePush($wheres->where, $clause, $side, self::AND);
+        if(is_string($clause) && is_array($side)) {
+
+            if (count($side) === 1) {
+                $makeSide = $side[0];
+                $wheres->where = $this->wherePush($wheres->where, $clause, $makeSide, self::AND);
+            }
+
+            if (count($side) === 2) {
+                $symbol     = $side[0];
+                $makeSide   = $side[1];
+                $wheres->where = $this->wherePush($wheres->where, $clause, $makeSide, self::AND, $symbol);
+            }
         }
 
         return $wheres;
@@ -111,8 +110,18 @@ class AsyncAction extends OrmAbs
             }
         }
 
-        if(is_string($clause)) {
-            $wheres->where = $this->wherePush($wheres->where, $clause, $side, self::OR);
+        if(is_string($clause) && is_array($side)) {
+
+            if (count($side) === 1) {
+                $makeSide       = $side[0];
+                $wheres->where  = $this->wherePush($wheres->where, $clause, $makeSide, self::OR);
+            }
+
+            if (count($side) === 2) {
+                $symbol         = $side[0];
+                $makeSide       = $side[1];
+                $wheres->where  = $this->wherePush($wheres->where, $clause, $makeSide, self::OR, $symbol);
+            }
         }
 
         return $wheres;

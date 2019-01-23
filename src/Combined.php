@@ -20,6 +20,27 @@ namespace Orm;
 trait Combined
 {
 
+
+    /**
+     * @param $where
+     * @param $clause
+     * @param $side
+     * @param $type
+     * @param string $symbol
+     * @return mixed
+     */
+    protected function wherePush($where, $clause, $side, $type, $symbol = '=') {
+        array_push($where, [
+                self::TYPE      => $type,
+                self::CLAUSE    => $clause,
+                self::SIDE      => $side,
+                self::SYMBOL    => $symbol
+            ]
+        );
+
+        return $where;
+    }
+
     /**
      * @return string
      */
@@ -60,17 +81,16 @@ trait Combined
             }
 
             if(is_array($item[self::SIDE])) {
-                $wheres .= $addon.$item[self::CLAUSE] . " ";
+                $wheres .= $addon . $item[self::CLAUSE] . " ";
 
                 foreach ($item[self::SIDE] as $sideItem) {
-                    // $wheres = Structures::strReplace("?", "'" . addslashes($sideItem) . "'", $wheres);
                     $wheres = "'" . addslashes($sideItem) . "'" . $wheres;
                 }
 
             } else{
 
                 if(!is_object($item[self::SIDE])) {
-                    $wheres .= $addon.$item[self::CLAUSE] . " = '" . addslashes($item[self::SIDE]) . "' ";
+                    $wheres .= $addon . $item[self::CLAUSE] . ' ' . $item[self::SYMBOL] . " '" . addslashes($item[self::SIDE]) . "' ";
 
                 } else{
                     $wheres .= $addon . $item[self::CLAUSE] . ($item[self::SIDE]->call()) . " ";
