@@ -11,6 +11,7 @@
 namespace Orm;
 
 
+use Exceptions\NotFoundException;
 use Exceptions\UnconnectedException;
 
 class CoRoutinePool
@@ -23,9 +24,14 @@ class CoRoutinePool
      * Initialize
      *
      * @param $config
+     * @throws NotFoundException
      * @throws UnconnectedException
      */
     private function initialize($config) {
+        if (!extension_loaded('swoole')) {
+            throw new NotFoundException('The swoole extension can not loaded.');
+        }
+
         $this->pool = new \chan($config['maxSize']);  // Create container pool for channel.
 
         for ($i = 0; $i < $config['maxSize']; $i++) {
@@ -45,6 +51,7 @@ class CoRoutinePool
      *
      * @param $config
      * @return null|CoRoutinePool
+     * @throws NotFoundException
      * @throws UnconnectedException
      */
     public static function getInstance($config) {

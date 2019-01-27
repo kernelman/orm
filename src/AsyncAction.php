@@ -31,7 +31,6 @@ class AsyncAction extends OrmAbs
     protected const NUM     = 'num';
     protected const TYPE    = 'type';
     protected const SIDE    = 'side';
-    protected const DEBUG   = 'debug';
     protected const CLAUSE  = 'clause';
     protected const OFFSET  = 'offset';
     protected const HAVING  = 'having';
@@ -212,9 +211,7 @@ class AsyncAction extends OrmAbs
      */
     public function find($callback){
         $query = $this->setSelect().$this->setTable().$this->setWhere().$this->setGroup().$this->setOrder().$this->setLimit();
-        if (Property::reality($this->options[self::DEBUG])) {
-            echo $query . PHP_EOL;
-        }
+        Debug::show($query, $this->options);
 
         $this->connect->query($query, function(\swoole_mysql $db, $result) use ($callback){
             $callback(new Result($this->orm, $result, $db));
@@ -235,10 +232,7 @@ class AsyncAction extends OrmAbs
         }
 
         $query = "SELECT COUNT($column) ".$this->setTable().$this->setWhere().$this->setGroup().$this->setOrder().$this->setLimit();
-
-        if (Property::reality($this->options[self::DEBUG])) {
-            echo $query . PHP_EOL;
-        }
+        Debug::show($query, $this->options);
 
         $this->connect->query($query, function(\swoole_mysql $db, $result) use ($callback) {
             $callback(new Result($this->orm, $result, $db));
@@ -251,10 +245,7 @@ class AsyncAction extends OrmAbs
      */
     public function sum($columnName, $callback){
         $query = "SELECT SUM($columnName) ".$this->setTable().$this->setWhere().$this->setGroup().$this->setOrder().$this->setLimit();
-
-        if (Property::reality($this->options[self::DEBUG])) {
-            echo $query . PHP_EOL;
-        }
+        Debug::show($query, $this->options);
 
         $this->connect->query($query, function(\swoole_mysql $db, $result) use ($callback) {
 
@@ -273,9 +264,7 @@ class AsyncAction extends OrmAbs
      */
     public function max($columnName, $callback){
         $query = "SELECT MAX($columnName) ".$this->setTable().$this->setWhere().$this->setGroup().$this->setOrder().$this->setLimit();
-        if (Property::reality($this->options[self::DEBUG])) {
-            echo $query . PHP_EOL;
-        }
+        Debug::show($query, $this->options);
 
         $this->connect->query($query, function(\swoole_mysql $db, $result) use ($callback){
             if(!$result) {
@@ -293,9 +282,7 @@ class AsyncAction extends OrmAbs
      */
     public function min($columnName, $callback){
         $query = "SELECT MIN($columnName) ".$this->setTable().$this->setWhere().$this->setGroup().$this->setOrder().$this->setLimit();
-        if (Property::reality($this->options[self::DEBUG])) {
-            echo $query . PHP_EOL;
-        }
+        Debug::show($query, $this->options);
 
         $this->connect->query($query, function(\swoole_mysql $db, $result) use ($callback){
             if(!$result) {
@@ -314,9 +301,7 @@ class AsyncAction extends OrmAbs
      */
     public function getBy($columnName, $value, $callback){
         $query = $this->setSelect() . $this->setTable()."WHERE $columnName = '".addslashes($value)."'";
-        if (Property::reality($this->options[self::DEBUG])) {
-            echo $query . PHP_EOL;
-        }
+        Debug::show($query, $this->options);
 
         $this->connect->query($query, function(\swoole_mysql $db, $result) use ($callback) {
             $callback(new Result($this->orm, $result, $db));
@@ -335,19 +320,14 @@ class AsyncAction extends OrmAbs
 
         if (is_string($id) || is_int($id)) {
             $query = "SELECT COLUMN_NAME FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_SCHEMA = '".$this->options['database']."' AND TABLE_NAME = '".$this->getTable()."' AND COLUMN_KEY = 'PRI'";
-            if (Property::reality($this->options[self::DEBUG])) {
-                echo $query . PHP_EOL;
-            }
+            Debug::show($query, $this->options);
 
             $this->connect->query($query, function(\swoole_mysql $db, $result) use ($callback, $id){
                 $result = new Result($this->orm, $result, $db);
                 if($result->status && isset($result->results[0]['COLUMN_NAME'])){
                     $key    = $result->results[0]['COLUMN_NAME'];
                     $query  = $this->setSelect() . $this->setTable() . "WHERE $key = '$id'";
-
-                    if (Property::reality($this->options[self::DEBUG])) {
-                        echo $query . PHP_EOL;
-                    }
+                    Debug::show($query, $this->options);
 
                     $this->connect->query($query, function(\swoole_mysql $db, $result) use ($callback){
                         $callback(new Result($this->orm, $result, $db));
@@ -381,10 +361,7 @@ class AsyncAction extends OrmAbs
             $sets = substr($sets, 0, -2);
         }
         $query = "UPDATE ".$this->getTable()." SET ".$sets." ".$this->setWhere().$this->setGroup().$this->setOrder().$this->setLimit();
-
-        if (Property::reality($this->options[self::DEBUG])) {
-            echo $query . PHP_EOL;
-        }
+        Debug::show($query, $this->options);
 
         $this->connect->query($query, function(\swoole_mysql $db, $result) use ($callback){
             if(!$result){
@@ -415,9 +392,7 @@ class AsyncAction extends OrmAbs
         }
 
         $query = "INSERT INTO ".$this->getTable()." ($fields) VALUES ($values)";
-        if (Property::reality($this->options[self::DEBUG])) {
-            echo $query . PHP_EOL;
-        }
+        Debug::show($query, $this->options);
 
         $this->connect->query($query, function(\swoole_mysql $db, $result) use ($callback){
             if(!$result){
@@ -432,9 +407,7 @@ class AsyncAction extends OrmAbs
      */
     public function delete($callback){
         $query = "DELETE ".$this->setTable().$this->setWhere().$this->setGroup().$this->setOrder().$this->setLimit();
-        if (Property::reality($this->options[self::DEBUG])) {
-            echo $query . PHP_EOL;
-        }
+        Debug::show($query, $this->options);
 
         $this->connect->query($query, function(\swoole_mysql $db, $result) use ($callback){
             if(!$result){

@@ -32,7 +32,6 @@ class CoRoutineAction extends OrmAbs
     protected const NUM     = 'num';
     protected const TYPE    = 'type';
     protected const SIDE    = 'side';
-    protected const DEBUG   = 'debug';
     protected const CLAUSE  = 'clause';
     protected const OFFSET  = 'offset';
     protected const HAVING  = 'having';
@@ -212,9 +211,7 @@ class CoRoutineAction extends OrmAbs
      */
     public function find() {
         $query = $this->setSelect().$this->setTable().$this->setWhere().$this->setGroup().$this->setOrder().$this->setLimit();
-        if (Property::reality($this->options[self::DEBUG])) {
-            echo $query . PHP_EOL;
-        }
+        Debug::show($query, $this->options);
 
         $result = $this->connect->query($query);
         return new Result($this->orm, $result);
@@ -229,10 +226,7 @@ class CoRoutineAction extends OrmAbs
     public function count($columnName = '*') {
 
         $query = "SELECT COUNT($columnName) ".$this->setTable().$this->setWhere().$this->setGroup().$this->setOrder().$this->setLimit();
-
-        if (Property::reality($this->options[self::DEBUG])) {
-            echo $query . PHP_EOL;
-        }
+        Debug::show($query, $this->options);
 
         $result = $this->connect->query($query);
         return new Result($this->orm, $result);
@@ -246,10 +240,7 @@ class CoRoutineAction extends OrmAbs
      */
     public function sum($columnName) {
         $query = "SELECT SUM($columnName) ". $this->setTable() . $this->setWhere() . $this->setGroup() . $this->setOrder() . $this->setLimit();
-
-        if (Property::reality($this->options[self::DEBUG])) {
-            echo $query . PHP_EOL;
-        }
+        Debug::show($query, $this->options);
 
         $result = $this->connect->query($query);
         return $this->getMakeResult($result, $this->orm, true);
@@ -263,9 +254,7 @@ class CoRoutineAction extends OrmAbs
      */
     public function max($columnName) {
         $query = "SELECT MAX($columnName) ".$this->setTable().$this->setWhere().$this->setGroup().$this->setOrder().$this->setLimit();
-        if (Property::reality($this->options[self::DEBUG])) {
-            echo $query . PHP_EOL;
-        }
+        Debug::show($query, $this->options);
 
         $result = $this->connect->query($query);
         return $this->getMakeResult($result, $this->orm, false);
@@ -277,9 +266,7 @@ class CoRoutineAction extends OrmAbs
      */
     public function min($columnName) {
         $query = "SELECT MIN($columnName) ".$this->setTable().$this->setWhere().$this->setGroup().$this->setOrder().$this->setLimit();
-        if (Property::reality($this->options[self::DEBUG])) {
-            echo $query . PHP_EOL;
-        }
+        Debug::show($query, $this->options);
 
         $result = $this->connect->query($query);
         return $this->getMakeResult($result, $this->orm, false);
@@ -294,9 +281,7 @@ class CoRoutineAction extends OrmAbs
      */
     public function getBy($columnName, $value) {
         $query = $this->setSelect() . $this->setTable()."WHERE $columnName = '".addslashes($value)."'";
-        if (Property::reality($this->options[self::DEBUG])) {
-            echo $query . PHP_EOL;
-        }
+        Debug::show($query, $this->options);
 
         $result = $this->connect->query($query);
         return new Result($this->orm, $result);
@@ -315,10 +300,7 @@ class CoRoutineAction extends OrmAbs
 
         if (is_string($id) || is_int($id)) {
             $query = "SELECT COLUMN_NAME FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_SCHEMA = '".$this->options['database']."' AND TABLE_NAME = '".$this->getTable()."' AND COLUMN_KEY = 'PRI'";
-
-            if (Property::reality($this->options[self::DEBUG])) {
-                echo $query . PHP_EOL;
-            }
+            Debug::show($query, $this->options);
 
             $query  = $this->connect->query($query);
             $result = new Result($this->orm, $query);
@@ -331,9 +313,7 @@ class CoRoutineAction extends OrmAbs
                 if ($key) {
 
                     $query  = $this->setSelect() . $this->setTable() . "WHERE $key = '$id'";
-                    if (Property::reality($this->options[self::DEBUG])) {
-                        echo $query . PHP_EOL;
-                    }
+                    Debug::show($query, $this->options);
 
                     $queryId = $this->connect->query($query);
                     return new Result($this->orm, $queryId);
@@ -367,10 +347,7 @@ class CoRoutineAction extends OrmAbs
             $sets = substr($sets, 0, -2);
         }
         $query = "UPDATE ".$this->getTable()." SET ".$sets." ".$this->setWhere().$this->setGroup().$this->setOrder().$this->setLimit();
-
-        if (Property::reality($this->options[self::DEBUG])) {
-            echo $query . PHP_EOL;
-        }
+        Debug::show($query, $this->options);
 
         $result = $this->connect->query($query);
         return $this->getAffectedRows($result, $this->orm);
@@ -399,9 +376,7 @@ class CoRoutineAction extends OrmAbs
         }
 
         $query = "INSERT INTO ".$this->getTable()." ($fields) VALUES ($values)";
-        if (Property::reality($this->options[self::DEBUG])) {
-            echo $query . PHP_EOL;
-        }
+        Debug::show($query, $this->options);
 
         $result = $this->connect->query($query);
         return $this->getAffectedRows($result, $this->orm);
@@ -412,9 +387,7 @@ class CoRoutineAction extends OrmAbs
      */
     public function delete() {
         $query = "DELETE ".$this->setTable().$this->setWhere().$this->setGroup().$this->setOrder().$this->setLimit();
-        if (Property::reality($this->options[self::DEBUG])) {
-            echo $query . PHP_EOL;
-        }
+        Debug::show($query, $this->options);
 
         $result = $this->connect->query($query);
         return $this->getAffectedRows($result, $this->orm);
