@@ -32,6 +32,7 @@ class CoRoutineOrm extends OrmAbs
      *
      * @param $config
      * @return $this
+     * @throws NotFoundException
      * @throws \Exceptions\UnconnectedException
      */
     public function connect($config) {
