@@ -18,6 +18,7 @@ class CoRoutineOrm extends OrmAbs
 
     /**
      * CoRoutineOrm constructor.
+     *
      * @throws NotFoundException
      */
     public function __construct() {
@@ -49,8 +50,17 @@ class CoRoutineOrm extends OrmAbs
         $this->connect->close();
     }
 
+    /**
+     * Recycle resource.
+     *
+     * @return mixed
+     */
     public function recycle() {
-        $this->pool->recycle($this->connect);
+        return $this->pool->recycle($this->connect);
+    }
+
+    public function getPoolSize() {
+        return $this->pool->poolSize($this->connect);
     }
 
     /**
